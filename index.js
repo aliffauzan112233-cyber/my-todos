@@ -25,7 +25,7 @@ app.post("/api/register", async (c) => {
       .values({ username, password: hashedPassword })
       .returning({ id: users.id, username: users.username });
 
-    return c.json({ success: true, data: newUser[0] }, 201);
+    return c.json({ success: true, data: newUser[0] }, 201);  
   } catch (error) {
     return c.json({ success: false, message: "Registrasi gagal" }, 400);
   }
