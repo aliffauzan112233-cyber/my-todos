@@ -118,21 +118,25 @@ app.post("/api/logout", (c) => {
 //Create Todo
 app.post("/api/todos", authMiddleware, async (c) => {
   try {
-    const { note } = await c.req.json();
     const user = c.get("user");
+    const { note } = await c.req.json();
 
     if (!note) {
       return c.json({ success: false, message: "Note wajib diisi" }, 400);
     }
 
-    const todo = await db
+    const [todo] = await db
       .insert(todos)
-      .values({ note, userId: user.id })
+      .values({
+        note,
+        userId: user.id,
+        status: "pending",
+      })
       .returning();
 
-    return c.json({ success: true, data: todo[0] }, 201);
-  } catch (error) {
-    console.error(error);
+    return c.json({ success: true, data: todo });
+  } catch (err) {
+    console.error("CREATE TODO ERROR:", err);
     return c.json({ success: false, message: "Server error" }, 500);
   }
 });
@@ -142,12 +146,13 @@ app.post("/api/todos", authMiddleware, async (c) => {
 app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
-  const userTodos = await db.query.todos.findMany({
+  const data = await db.query.todos.findMany({
     where: (t, { eq }) => eq(t.userId, user.id),
   });
 
-  return c.json({ success: true, data: userTodos });
+  return c.json({ success: true, data });
 });
+
 
 // update Todo Status
 app.put("/api/todos/:id/status", authMiddleware, async (c) => {
@@ -155,17 +160,17 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const id = Number(c.req.param("id"));
   const { status } = await c.req.json();
 
-  const updated = await db
+  const [updated] = await db
     .update(todos)
     .set({ status })
     .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
     .returning();
 
-  if (updated.length === 0) {
+  if (!updated) {
     return c.json({ success: false, message: "Todo tidak ditemukan" }, 404);
   }
 
-  return c.json({ success: true, data: updated[0] });
+  return c.json({ success: true, data: updated });
 });
 
 //Delete Todo
@@ -173,16 +178,16 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
 
-  const deleted = await db
+  const [deleted] = await db
     .delete(todos)
     .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
     .returning();
 
-  if (deleted.length === 0) {
+  if (!deleted) {
     return c.json({ success: false, message: "Todo tidak ditemukan" }, 404);
   }
 
-  return c.json({ success: true, message: "Todo berhasil dihapus" });
+  return c.json({ success: true });
 });
 
 
