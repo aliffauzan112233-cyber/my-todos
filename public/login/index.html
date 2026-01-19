@@ -1,41 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | My Todos</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <style>
-    /* Reset dasar */
     * {
-      box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      min-height: 100vh;
+      background: linear-gradient(120deg, #667eea, #764ba2);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      overflow: hidden;
     }
 
-    .container {
-      background: white;
-      width: 350px;
-      padding: 30px 25px;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      animation: fadeIn 0.6s ease;
+    /* background animation */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      top: -120px;
+      left: -120px;
     }
 
-    @keyframes fadeIn {
+    body::after {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      bottom: -100px;
+      right: -100px;
+    }
+
+    .login-card {
+      position: relative;
+      width: 380px;
+      padding: 35px 30px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      color: #fff;
+      animation: fadeUp 0.8s ease;
+    }
+
+    @keyframes fadeUp {
       from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(20px);
       }
       to {
         opacity: 1;
@@ -43,107 +74,151 @@
       }
     }
 
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 600;
     }
 
-    input {
-      width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    .login-card p.subtitle {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 25px;
+      opacity: 0.85;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .input-group i {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      color: #ddd;
       font-size: 15px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background: rgba(255,255,255,0.9);
       transition: 0.3s;
     }
 
-    input:focus {
-      border-color: #4e54c8;
-      outline: none;
-      box-shadow: 0 0 5px rgba(78, 84, 200, 0.3);
+    .input-group input:focus {
+      box-shadow: 0 0 0 2px rgba(102,126,234,0.5);
     }
 
     button {
       width: 100%;
-      background: #4e54c8;
-      color: white;
+      padding: 12px;
+      border-radius: 12px;
       border: none;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
       transition: 0.3s;
     }
 
     button:hover {
-      background: #3b40a4;
-    }
-
-    p {
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    a {
-      color: #4e54c8;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    a:hover {
-      text-decoration: underline;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
     }
 
     #message {
-      color: red;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      text-align: center;
       font-size: 14px;
+      color: #ffb3b3;
+    }
+
+    .footer-text {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .footer-text a {
+      color: #fff;
+      font-weight: 500;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 420px) {
+      .login-card {
+        width: 90%;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>Login</h1>
+
+  <div class="login-card">
+    <h1>Welcome Back 👋</h1>
+    <p class="subtitle">Login untuk mengelola todo kamu</p>
+
     <div id="message"></div>
+
     <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="password" id="password" placeholder="Password" required />
+      <div class="input-group">
+        <i class="fa fa-user"></i>
+        <input type="text" id="username" placeholder="Username" required />
+      </div>
+
+      <div class="input-group">
+        <i class="fa fa-lock"></i>
+        <input type="password" id="password" placeholder="Password" required />
+      </div>
+
       <button type="submit">Login</button>
     </form>
-    <p>Belum punya akun? <a href="/register/">Daftar di sini</a></p>
+
+    <div class="footer-text">
+      Belum punya akun? <a href="/register/">Daftar</a>
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById('loginForm');
-    const messageDiv = document.getElementById('message');
+    const form = document.getElementById("loginForm");
+    const messageDiv = document.getElementById("message");
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      messageDiv.textContent = '';
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      messageDiv.textContent = "";
 
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
         });
 
-        const result = await response.json();
+        const result = await res.json();
 
         if (result.success) {
-          window.location.href = '/todos/';
+          window.location.href = "/todos/";
         } else {
-          messageDiv.textContent = result.message || 'Login gagal!';
+          messageDiv.textContent = result.message || "Login gagal";
         }
-      } catch (error) {
-        messageDiv.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+      } catch (err) {
+        messageDiv.textContent = "Server error, coba lagi";
       }
     });
   </script>
-</body>
 
+</body>
 </html>
