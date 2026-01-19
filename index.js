@@ -1,174 +1,197 @@
-// index.js
+import "dotenv/config";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import "dotenv/config";
+
 import { serveStatic } from "@hono/node-server/serve-static";
-import { users, todos } from "./db/schema.js";
-import jwt from "jsonwebtoken";
+
 import { setCookie, getCookie } from "hono/cookie";
-import { db } from "./db/index.js";
+
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+
+import { db } from "./db/index.js";
+import { users, todos } from "./db/schema.js";
+import { and, eq } from "drizzle-orm";
 
 const app = new Hono();
 app.use("/*", serveStatic({ root: "./public" }));
 
-// index.js
-// ... (import Hono, serve, dll)
 
-// API Registrasi
+const authMiddleware = async (c, next) => {
+  const token = getCookie(c, "token");
+  if (!token) {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+  }
+
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    c.set("user", user);
+    await next();
+  } catch {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+  }
+};
+
+//Register
 app.post("/api/register", async (c) => {
   try {
     const { username, password } = await c.req.json();
+
+    if (!username || !password) {
+      return c.json(
+        { success: false, message: "Username dan password wajib diisi" },
+        400
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await db
       .insert(users)
       .values({ username, password: hashedPassword })
-      .returning({ id: users.id, username: users.username });
+      .returning({
+        id: users.id,
+        username: users.username,
+      });
 
-    return c.json({ success: true, data: newUser[0] }, 201);  
+    return c.json({ success: true, data: newUser[0] }, 201);
   } catch (error) {
-    return c.json({ success: false, message: "Registrasi gagal" }, 400);
+    console.error("REGISTER ERROR:", error);
+    return c.json({ success: false, message: "Registrasi gagal" }, 500);
   }
 });
 
-// ... (import lain)
-
-// ... (setelah endpoint /register)
-
-// API Login
+//Login
 app.post("/api/login", async (c) => {
-  const { username, password } = await c.req.json();
-  const user = await db.query.users.findFirst({
-    where: (users, { eq }) => eq(users.username, username),
-  });
-
-  if (!user)
-    return c.json(
-      { success: false, message: "Username atau password salah" },
-      401
-    );
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid)
-    return c.json(
-      { success: false, message: "Username atau password salah" },
-      401
-    );
-
-  const token = jwt.sign(
-    { id: user.id, username: user.username },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
-
-  setCookie(c, "token", token, {
-    httpOnly: true,
-    sameSite: "Lax",
-    maxAge: 3600,
-  });
-
-  return c.json({ success: true, message: "Login berhasil" });
-});
-
-// ... (import lain)
-
-app.get("/api/me", (c) => {
-  const token = getCookie(c, "token");
-  if (!token) return c.json({ success: false, message: "Unauthorized" }, 401);
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const { username, password } = await c.req.json();
 
-    return c.json({ success: true, data: user });
+    const user = await db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.username, username),
+    });
+
+    if (!user) {
+      return c.json(
+        { success: false, message: "Username atau password salah" },
+        401
+      );
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return c.json(
+        { success: false, message: "Username atau password salah" },
+        401
+      );
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    setCookie(c, "token", token, {
+      httpOnly: true,
+      sameSite: "Lax",
+      maxAge: 3600,
+    });
+
+    return c.json({ success: true, message: "Login berhasil" });
   } catch (error) {
-    return c.json({ success: false, message: "Unauthorized" }, 401);
+    console.error("LOGIN ERROR:", error);
+    return c.json({ success: false, message: "Login gagal" }, 500);
   }
 });
 
-// API Logout
+//Get Me
+app.get("/api/me", authMiddleware, (c) => {
+  return c.json({ success: true, data: c.get("user") });
+});
+
+//Logout
 app.post("/api/logout", (c) => {
   setCookie(c, "token", "", { maxAge: -1 });
   return c.json({ success: true, message: "Logout berhasil" });
 });
 
-//tambahkan todos
-
-// API Menambah Todo
-app.post('/api/todos', async (c) => {
-  const token = getCookie(c, 'token');
-    if (!token) return c.json({ success: false, message: 'Unauthorized1' }, 401);
-    try {
-        const user = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(user)
-        const { note } = await c.req.json();
-        console.log(note)
-        const newTodo = await db.insert(todos).values({ note, userId: user.id }).returning();
-        return c.json({ success: true, data: newTodo[0] }, 201);
-    } catch (error) {
-      console.log(error)
-        return c.json({ success: false, message: 'server error'}, 500);
-    }
-});
-
-// ... di dalam `const api = new Hono();`
-
-// API Melihat Semua Todo milik User
-app.get("/api/todos", async (c) => {
-  const token = getCookie(c, "token");
-  if (!token) return c.json({ success: false, message: "Unauthorized2" + token }, 401);
+//Create Todo
+app.post("/api/todos", authMiddleware, async (c) => {
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-    const userTodos = await db.query.todos.findMany({
-      where: (todos, { eq }) => eq(todos.userId, user.id),
-    });
-    return c.json({ success: true, data: userTodos });
+    const { note } = await c.req.json();
+    const user = c.get("user");
+
+    if (!note) {
+      return c.json({ success: false, message: "Note wajib diisi" }, 400);
+    }
+
+    const todo = await db
+      .insert(todos)
+      .values({ note, userId: user.id })
+      .returning();
+
+    return c.json({ success: true, data: todo[0] }, 201);
   } catch (error) {
-    return c.json({ success: false, message: "Unauthorized1" }, 401);
+    console.error(error);
+    return c.json({ success: false, message: "Server error" }, 500);
   }
 });
 
 
-// ... di dalam `const app = new Hono();`
-app.put('/api/todos/:id/status', async (c) => {
-  const token = getCookie(c, "token");
-  if (!token) return c.json({ success: false, message: "Unauthorized2" + token }, 401);
-    const user =  jwt.verify(token, process.env.JWT_SECRET);
-    const id = parseInt(c.req.param('id'));
-    const { status } = await c.req.json(); // e.g., "completed"
+//Get Todo
+app.get("/api/todos", authMiddleware, async (c) => {
+  const user = c.get("user");
 
-    const updatedTodo = await db.update(todos)
-        .set({ status })
-        .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
-        .returning();
+  const userTodos = await db.query.todos.findMany({
+    where: (t, { eq }) => eq(t.userId, user.id),
+  });
 
-    if (updatedTodo.length === 0) return c.json({ success: false, message: user }, 404);
-    return c.json({ success: true, data: updatedTodo[0] });
+  return c.json({ success: true, data: userTodos });
 });
 
-import { and, eq } from "drizzle-orm";
-// ... di dalam `const app = new Hono();`
-app.delete('/api/todos/:id', async (c) => {
+// update Todo Status
+app.put("/api/todos/:id/status", authMiddleware, async (c) => {
+  const user = c.get("user");
+  const id = Number(c.req.param("id"));
+  const { status } = await c.req.json();
 
-    // ... ambil token kemudian peroleh user
-    const id = parseInt(c.req.param('id'));
-    
-    const deletedTodo = await db.delete(todos)
-        .where(eq(todos.id, id))
-        .returning();
+  const updated = await db
+    .update(todos)
+    .set({ status })
+    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+    .returning();
 
-    if (deletedTodo.length === 0) return c.json({ success: false, message: 'data is not exist' }, 404);
-    console.log(deletedTodo[1])
-    return c.json({ success: true, message: 'Todo deleted' });
+  if (updated.length === 0) {
+    return c.json({ success: false, message: "Todo tidak ditemukan" }, 404);
+  }
+
+  return c.json({ success: true, data: updated[0] });
 });
 
-// app.get("/", (c) => c.html("<h1>Tim Pengembang</h1><h2>Nama Kalian</h2>"));
+//Delete Todo
+app.delete("/api/todos/:id", authMiddleware, async (c) => {
+  const user = c.get("user");
+  const id = Number(c.req.param("id"));
 
-// // ... (kode serve)
+  const deleted = await db
+    .delete(todos)
+    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+    .returning();
 
-// app.get("/", (c) => {
-//   return c.html("<h1>Tim Pengembang</h1><h2>Nama Kalian</h2>");
-// });
+  if (deleted.length === 0) {
+    return c.json({ success: false, message: "Todo tidak ditemukan" }, 404);
+  }
 
-// Jalankan Server
+  return c.json({ success: true, message: "Todo berhasil dihapus" });
+});
+
+
+// Home
+app.get("/", (c) =>
+  c.html("<h1>Tim Pengembang</h1><h2>Nama Kalian</h2>")
+);
+
+// server
 const port = 5000;
-console.log(` Server is running on http://localhost:${port}`);
+console.log(`🚀 Server is running on http://localhost:${port}`);
 serve({ fetch: app.fetch, port });
