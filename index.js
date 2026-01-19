@@ -104,18 +104,18 @@ app.post("/api/login", async (c) => {
   }
 });
 
-//Get Me
+//Get Me (untuk mengecek apakah sudah login atau belum)
 app.get("/api/me", authMiddleware, (c) => {
   return c.json({ success: true, data: c.get("user") });
 });
 
-//Logout
+//Logout (keluar)
 app.post("/api/logout", (c) => {
   setCookie(c, "token", "", { maxAge: -1 });
   return c.json({ success: true, message: "Logout berhasil" });
 });
 
-//Create Todo
+//Create Todo (membuat)
 app.post("/api/todos", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
@@ -142,7 +142,7 @@ app.post("/api/todos", authMiddleware, async (c) => {
 });
 
 
-//Get Todo
+//Get Todo (untuk mengambil data)
 app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
