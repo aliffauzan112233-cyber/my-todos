@@ -1,1 +1,22 @@
-{"name":"my-todos","version":"1.0.0","type":"module","scripts":{"start":"node index.js"},"dependencies":{"@hono/node-server":"^1.19.9","bcryptjs":"^3.0.3","dotenv":"^17.2.3","drizzle-orm":"^0.45.1","hono":"^4.11.4","jsonwebtoken":"^9.0.3","pg":"^8.17.1"}}
+{
+  "name": "my-todos",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.11.4",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.6"
+  }
+}

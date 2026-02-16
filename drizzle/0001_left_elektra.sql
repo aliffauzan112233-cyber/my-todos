@@ -1,1 +1,0 @@
-ALTER TABLE "todos" ADD COLUMN "status" varchar(50) DEFAULT 'pending' NOT NULL;

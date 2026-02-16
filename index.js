@@ -19,18 +19,25 @@ app.use("/*", serveStatic({ root: "./public" }));
 
 const authMiddleware = async (c, next) => {
   const token = getCookie(c, "token");
+
   if (!token) {
     return c.json({ success: false, message: "Unauthorized" }, 401);
   }
 
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-    c.set("user", user);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    c.set("user", {
+      id: payload.id,
+      username: payload.username,
+    });
+
     await next();
-  } catch {
+  } catch (err) {
     return c.json({ success: false, message: "Unauthorized" }, 401);
   }
 };
+
 
 //Register
 app.post("/api/register", async (c) => {
@@ -121,7 +128,7 @@ app.post("/api/todos", authMiddleware, async (c) => {
     const user = c.get("user");
     const { note } = await c.req.json();
 
-    if (!note) {
+    if (!note || note.trim() === "") {
       return c.json({ success: false, message: "Note wajib diisi" }, 400);
     }
 
@@ -129,7 +136,7 @@ app.post("/api/todos", authMiddleware, async (c) => {
       .insert(todos)
       .values({
         note,
-        userId: user.id,
+        userId: my-todos.id,
         status: "pending",
       })
       .returning();
@@ -147,7 +154,7 @@ app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
   const data = await db.query.todos.findMany({
-    where: (t, { eq }) => eq(t.userId, user.id),
+    where: (t, { eq }) => eq(t.userId, my-todos.id),
   });
 
   return c.json({ success: true, data });
@@ -163,7 +170,7 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const [updated] = await db
     .update(todos)
     .set({ status })
-    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, my-todos.id)))
     .returning();
 
   if (!updated) {
@@ -180,7 +187,7 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
 
   const [deleted] = await db
     .delete(todos)
-    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, my-todos.id)))
     .returning();
 
   if (!deleted) {
