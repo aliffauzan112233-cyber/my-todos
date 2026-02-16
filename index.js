@@ -1,9 +1,7 @@
 import "dotenv/config";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-
 import { serveStatic } from "@hono/node-server/serve-static";
-
 import { setCookie, getCookie } from "hono/cookie";
 
 import jwt from "jsonwebtoken";
@@ -16,7 +14,9 @@ import { and, eq } from "drizzle-orm";
 const app = new Hono();
 app.use("/*", serveStatic({ root: "./public" }));
 
-
+// ==================
+// AUTH MIDDLEWARE
+// ==================
 const authMiddleware = async (c, next) => {
   const token = getCookie(c, "token");
 
@@ -33,13 +33,14 @@ const authMiddleware = async (c, next) => {
     });
 
     await next();
-  } catch (err) {
+  } catch {
     return c.json({ success: false, message: "Unauthorized" }, 401);
   }
 };
 
-
-//Register
+// ==================
+// REGISTER
+// ==================
 app.post("/api/register", async (c) => {
   try {
     const { username, password } = await c.req.json();
@@ -53,22 +54,21 @@ app.post("/api/register", async (c) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await db
+    const [newUser] = await db
       .insert(users)
       .values({ username, password: hashedPassword })
-      .returning({
-        id: users.id,
-        username: users.username,
-      });
+      .returning();
 
-    return c.json({ success: true, data: newUser[0] }, 201);
+    return c.json({ success: true, data: newUser }, 201);
   } catch (error) {
     console.error("REGISTER ERROR:", error);
     return c.json({ success: false, message: "Registrasi gagal" }, 500);
   }
 });
 
-//Login
+// ==================
+// LOGIN
+// ==================
 app.post("/api/login", async (c) => {
   try {
     const { username, password } = await c.req.json();
@@ -111,18 +111,24 @@ app.post("/api/login", async (c) => {
   }
 });
 
-//Get Me (untuk mengecek apakah sudah login atau belum)
+// ==================
+// GET ME
+// ==================
 app.get("/api/me", authMiddleware, (c) => {
   return c.json({ success: true, data: c.get("user") });
 });
 
-//Logout (keluar)
+// ==================
+// LOGOUT
+// ==================
 app.post("/api/logout", (c) => {
   setCookie(c, "token", "", { maxAge: -1 });
   return c.json({ success: true, message: "Logout berhasil" });
 });
 
-//Create Todo (membuat)
+// ==================
+// CREATE TODO ✅ FIX
+// ==================
 app.post("/api/todos", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
@@ -148,20 +154,22 @@ app.post("/api/todos", authMiddleware, async (c) => {
   }
 });
 
-
-//Get Todo (untuk mengambil data)
+// ==================
+// GET TODO ✅ FIX
+// ==================
 app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
   const data = await db.query.todos.findMany({
-    where: (t, { eq }) => eq(t.userId, users.id),
+    where: (t, { eq }) => eq(t.userId, user.id),
   });
 
   return c.json({ success: true, data });
 });
 
-
-// update Todo Status
+// ==================
+// UPDATE STATUS ✅ FIX
+// ==================
 app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
@@ -170,7 +178,7 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const [updated] = await db
     .update(todos)
     .set({ status })
-    .where(and(eq(todos.id, id), eq(todos.userId, users.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
     .returning();
 
   if (!updated) {
@@ -180,14 +188,16 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   return c.json({ success: true, data: updated });
 });
 
-//Delete Todo
+// ==================
+// DELETE TODO ✅ FIX
+// ==================
 app.delete("/api/todos/:id", authMiddleware, async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
 
   const [deleted] = await db
     .delete(todos)
-    .where(and(eq(todos.id, id), eq(todos.userId, users.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
     .returning();
 
   if (!deleted) {
@@ -197,13 +207,16 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
   return c.json({ success: true });
 });
 
-
-// Home
+// ==================
+// HOME
+// ==================
 app.get("/", (c) =>
   c.html("<h1>Tim Pengembang</h1><h2>Nama Kalian</h2>")
 );
 
-// server
+// ==================
+// SERVER
+// ==================
 const port = 5000;
 console.log(`🚀 Server is running on http://localhost:${port}`);
 serve({ fetch: app.fetch, port });

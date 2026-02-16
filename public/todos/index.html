@@ -221,10 +221,15 @@
   // cek login
   (async () => {
     try {
-      const res = await fetch("/api/me");
+      const res = await fetch("/api/me", {
+        credentials: "include"
+      });
+
       if (!res.ok) return location.href = "/login/";
+
       const { success, data } = await res.json();
       if (!success) return location.href = "/login/";
+
       usernameSpan.textContent = data.username;
       fetchTodos();
     } catch {
@@ -232,8 +237,12 @@
     }
   })();
 
+  // ambil todos
   async function fetchTodos() {
-    const res = await fetch("/api/todos");
+    const res = await fetch("/api/todos", {
+      credentials: "include"
+    });
+
     const { data } = await res.json();
 
     todoList.innerHTML = "";
@@ -249,12 +258,17 @@
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = todo.status === "completed";
+
       checkbox.onchange = async () => {
         await fetch(`/api/todos/${todo.id}/status`, {
           method: "PUT",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: checkbox.checked ? "completed" : "pending" })
+          body: JSON.stringify({
+            status: checkbox.checked ? "completed" : "pending"
+          })
         });
+
         li.classList.toggle("completed", checkbox.checked);
       };
 
@@ -264,8 +278,12 @@
       const del = document.createElement("button");
       del.className = "delete";
       del.innerHTML = '<i class="fa fa-trash"></i>';
+
       del.onclick = async () => {
-        await fetch(`/api/todos/${todo.id}`, { method: "DELETE" });
+        await fetch(`/api/todos/${todo.id}`, {
+          method: "DELETE",
+          credentials: "include"
+        });
         fetchTodos();
       };
 
@@ -277,26 +295,34 @@
     });
   }
 
+  // tambah todo
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const note = noteInput.value.trim();
     if (!note) return;
 
     await fetch("/api/todos", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ note }),
+      body: JSON.stringify({ note })
     });
 
     noteInput.value = "";
     fetchTodos();
   });
 
+  // logout
   async function logout() {
-    await fetch("/api/logout", { method: "POST" });
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include"
+    });
     location.href = "/login/";
   }
 </script>
+
 
 </body>
 
