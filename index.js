@@ -136,7 +136,7 @@ app.post("/api/todos", authMiddleware, async (c) => {
       .insert(todos)
       .values({
         note,
-        userId: my-todos.id,
+        userId: user.id,
         status: "pending",
       })
       .returning();
@@ -154,7 +154,7 @@ app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
   const data = await db.query.todos.findMany({
-    where: (t, { eq }) => eq(t.userId, my-todos.id),
+    where: (t, { eq }) => eq(t.userId, users.id),
   });
 
   return c.json({ success: true, data });
@@ -170,7 +170,7 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const [updated] = await db
     .update(todos)
     .set({ status })
-    .where(and(eq(todos.id, id), eq(todos.userId, my-todos.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, users.id)))
     .returning();
 
   if (!updated) {
@@ -187,7 +187,7 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
 
   const [deleted] = await db
     .delete(todos)
-    .where(and(eq(todos.id, id), eq(todos.userId, my-todos.id)))
+    .where(and(eq(todos.id, id), eq(todos.userId, users.id)))
     .returning();
 
   if (!deleted) {
