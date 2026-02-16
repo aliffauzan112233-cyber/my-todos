@@ -206,13 +206,37 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
 
   return c.json({ success: true });
 });
+// ==================
+// PAGE GUARD
+// ==================
+const requireGuest = async (c, next) => {
+  const token = getCookie(c, "token");
+  if (token) {
+    return c.redirect("/todos.html");
+  }
+  await next();
+};
+
+const requireAuthPage = async (c, next) => {
+  const token = getCookie(c, "token");
+  if (!token) {
+    return c.redirect("/login.html");
+  }
+  await next();
+};
+
 
 // ==================
 // HOME
 // ==================
-app.get("/", (c) =>
-  c.html("<h1>Tim Pengembang</h1><h2>Nama Kalian</h2>")
-);
+app.get("/", (c) => {
+  const token = getCookie(c, "token");
+  if (token) {
+    return c.redirect("/todos.html");
+  }
+  return c.redirect("/login.html");
+});
+
 
 // ==================
 // SERVER
