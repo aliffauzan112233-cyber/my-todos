@@ -5,157 +5,204 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | My Todos</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-
-  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --glass: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
     }
 
     body {
       min-height: 100vh;
-      background: linear-gradient(120deg, #667eea, #764ba2);
+      font-family: 'Inter', sans-serif;
+      background: #0f172a; /* Fallback */
+      background: var(--bg-gradient);
       display: flex;
       justify-content: center;
       align-items: center;
+      perspective: 1000px;
       overflow: hidden;
     }
 
-    /* background animation */
-    body::before {
-      content: "";
+    /* Animated background elements */
+    .circles {
       position: absolute;
-      width: 500px;
-      height: 500px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 50%;
-      top: -120px;
-      left: -120px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
     }
 
-    body::after {
-      content: "";
+    .circles li {
       position: absolute;
-      width: 400px;
-      height: 400px;
-      background: rgba(255,255,255,0.1);
+      display: block;
+      list-style: none;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      animation: animate 25s linear infinite;
+      bottom: -150px;
       border-radius: 50%;
-      bottom: -100px;
-      right: -100px;
     }
 
+    @keyframes animate {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+    }
+
+    /* Card Styling */
     .login-card {
-      position: relative;
-      width: 380px;
-      padding: 35px 30px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-      color: #fff;
-      animation: fadeUp 0.8s ease;
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .login-card h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px;
+      color: #fff;
       text-align: center;
-      margin-bottom: 10px;
-      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
 
-    .login-card p.subtitle {
+    .subtitle {
+      color: rgba(255, 255, 255, 0.7);
       text-align: center;
       font-size: 14px;
-      margin-bottom: 25px;
-      opacity: 0.85;
+      margin-bottom: 32px;
     }
 
+    /* Input Styling */
     .input-group {
       position: relative;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .input-group i {
       position: absolute;
+      left: 16px;
       top: 50%;
-      left: 14px;
       transform: translateY(-50%);
-      color: #ddd;
-      font-size: 15px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 18px;
+      transition: 0.3s;
     }
 
     .input-group input {
       width: 100%;
-      padding: 12px 14px 12px 40px;
+      padding: 14px 16px 14px 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
       border-radius: 12px;
-      border: none;
+      color: #fff;
+      font-size: 15px;
       outline: none;
-      font-size: 14px;
-      background: rgba(255,255,255,0.9);
-      transition: 0.3s;
+      transition: all 0.3s ease;
     }
 
     .input-group input:focus {
-      box-shadow: 0 0 0 2px rgba(102,126,234,0.5);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
     }
 
+    .input-group input:focus + i {
+      color: #fff;
+    }
+
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Button Styling */
     button {
       width: 100%;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      color: #4f46e5;
       border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      margin-top: 10px;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      background: #f8fafc;
     }
 
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Error Message */
     #message {
-      margin-bottom: 12px;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
       text-align: center;
-      font-size: 14px;
-      color: #ffb3b3;
+      margin-bottom: 20px;
+      display: none; /* Hidden by default */
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
+    /* Footer */
     .footer-text {
-      margin-top: 18px;
+      margin-top: 24px;
       text-align: center;
+      color: rgba(255, 255, 255, 0.6);
       font-size: 14px;
     }
 
     .footer-text a {
       color: #fff;
-      font-weight: 500;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .footer-text a:hover {
       text-decoration: underline;
     }
 
-    @media (max-width: 420px) {
+    /* Mobile Responsive */
+    @media (max-width: 480px) {
       .login-card {
-        width: 90%;
+        margin: 20px;
+        padding: 30px 20px;
       }
     }
   </style>
@@ -163,42 +210,55 @@
 
 <body>
 
+  <ul class="circles">
+    <li style="left: 25%; width: 80px; height: 80px; animation-delay: 0s;"></li>
+    <li style="left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s;"></li>
+    <li style="left: 70%; width: 20px; height: 20px; animation-delay: 4s;"></li>
+    <li style="left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s;"></li>
+    <li style="left: 85%; width: 110px; height: 110px; animation-delay: 0s;"></li>
+  </ul>
+
   <div class="login-card">
-    <h1>Welcome Back 👋</h1>
-    <p class="subtitle">Login untuk mengelola todo kamu</p>
+    <h1>Welcome Back!</h1>
+    <p class="subtitle">Kelola tugas harianmu dengan lebih mudah</p>
 
     <div id="message"></div>
 
     <form id="loginForm">
       <div class="input-group">
-        <i class="fa fa-user"></i>
-        <input type="text" id="username" placeholder="Username" required />
+        <i class="fa-regular fa-envelope"></i>
+        <input type="text" id="username" placeholder="Username / Email" required autocomplete="off"/>
       </div>
 
       <div class="input-group">
-        <i class="fa fa-lock"></i>
+        <i class="fa-solid fa-lock"></i>
         <input type="password" id="password" placeholder="Password" required />
       </div>
 
-      <button type="submit">Login</button>
+      <button type="submit" id="loginBtn">Masuk Sekarang</button>
     </form>
 
     <div class="footer-text">
-      Belum punya akun? <a href="/register/">Daftar</a>
+      Belum punya akun? <a href="/register/">Buat Akun</a>
     </div>
   </div>
 
   <script>
     const form = document.getElementById("loginForm");
     const messageDiv = document.getElementById("message");
+    const btn = document.getElementById("loginBtn");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      // UI Feedback
+      btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Loading...';
+      btn.style.opacity = "0.7";
+      btn.disabled = true;
+      messageDiv.style.display = "none";
 
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
-
-      messageDiv.textContent = "";
 
       try {
         const res = await fetch("/api/login", {
@@ -212,10 +272,16 @@
         if (result.success) {
           window.location.href = "/todos/";
         } else {
-          messageDiv.textContent = result.message || "Login gagal";
+          messageDiv.textContent = result.message || "Username atau password salah.";
+          messageDiv.style.display = "block";
         }
       } catch (err) {
-        messageDiv.textContent = "Server error, coba lagi";
+        messageDiv.textContent = "Koneksi ke server bermasalah.";
+        messageDiv.style.display = "block";
+      } finally {
+        btn.innerHTML = 'Masuk Sekarang';
+        btn.style.opacity = "1";
+        btn.disabled = false;
       }
     });
   </script>

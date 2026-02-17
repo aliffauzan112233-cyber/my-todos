@@ -5,155 +5,198 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register | My Todos</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-
-  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
+    :root {
+      --primary: #6366f1;
+      --bg-gradient: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      --glass: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --success: #b6ffce;
+      --error: #fca5a5;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
     }
 
     body {
       min-height: 100vh;
-      background: linear-gradient(120deg, #667eea, #764ba2);
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 50%;
-      top: -120px;
-      left: -120px;
-    }
-
-    body::after {
-      content: "";
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
-      bottom: -100px;
-      right: -100px;
-    }
-
-    .register-card {
       position: relative;
-      width: 390px;
-      padding: 35px 30px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-      color: #fff;
-      animation: fadeUp 0.8s ease;
     }
 
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(25px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* Animated background elements (Sama dengan Login agar konsisten) */
+    .circles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .circles li {
+      position: absolute;
+      display: block;
+      list-style: none;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      animation: animate 25s linear infinite;
+      bottom: -150px;
+      border-radius: 50%;
+    }
+
+    @keyframes animate {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+    }
+
+    /* Card Styling */
+    .register-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      color: #fff;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .register-card h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px;
       text-align: center;
       margin-bottom: 8px;
-      font-weight: 600;
+      letter-spacing: -0.5px;
     }
 
-    .register-card p.subtitle {
+    .subtitle {
+      color: rgba(255, 255, 255, 0.7);
       text-align: center;
       font-size: 14px;
-      margin-bottom: 25px;
-      opacity: 0.85;
+      margin-bottom: 30px;
     }
 
+    /* Input Styling */
     .input-group {
       position: relative;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .input-group i {
       position: absolute;
+      left: 16px;
       top: 50%;
-      left: 14px;
       transform: translateY(-50%);
-      color: #ddd;
-      font-size: 15px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 17px;
+      transition: 0.3s;
     }
 
     .input-group input {
       width: 100%;
-      padding: 12px 14px 12px 40px;
+      padding: 14px 16px 14px 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
       border-radius: 12px;
-      border: none;
+      color: #fff;
+      font-size: 15px;
       outline: none;
-      font-size: 14px;
-      background: rgba(255,255,255,0.9);
-      transition: 0.3s;
+      transition: all 0.3s ease;
     }
 
     .input-group input:focus {
-      box-shadow: 0 0 0 2px rgba(102,126,234,0.5);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
     }
 
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Button Styling */
     button {
       width: 100%;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      color: #6366f1;
       border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      margin-top: 10px;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      background: #f8fafc;
     }
 
+    /* Message Styling */
     #message {
-      margin-bottom: 12px;
+      margin-bottom: 20px;
       text-align: center;
       font-size: 14px;
+      min-height: 20px;
+      line-height: 1.5;
     }
 
+    #message a {
+      color: var(--success);
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    /* Footer */
     .footer-text {
-      margin-top: 18px;
+      margin-top: 25px;
       text-align: center;
+      color: rgba(255, 255, 255, 0.6);
       font-size: 14px;
     }
 
     .footer-text a {
       color: #fff;
-      font-weight: 500;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .footer-text a:hover {
       text-decoration: underline;
     }
 
+    /* Responsive */
     @media (max-width: 420px) {
       .register-card {
-        width: 90%;
+        margin: 20px;
+        padding: 30px 20px;
       }
     }
   </style>
@@ -161,34 +204,43 @@
 
 <body>
 
+  <ul class="circles">
+    <li style="left: 25%; width: 80px; height: 80px; animation-delay: 0s;"></li>
+    <li style="left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s;"></li>
+    <li style="left: 70%; width: 20px; height: 20px; animation-delay: 4s;"></li>
+    <li style="left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s;"></li>
+    <li style="left: 85%; width: 110px; height: 110px; animation-delay: 0s;"></li>
+  </ul>
+
   <div class="register-card">
     <h1>Create Account 🚀</h1>
-    <p class="subtitle">Daftar untuk mulai mengelola todo</p>
+    <p class="subtitle">Daftar sekarang untuk atur jadwalmu</p>
 
     <div id="message"></div>
 
     <form id="registerForm">
       <div class="input-group">
-        <i class="fa fa-user"></i>
-        <input type="text" id="username" placeholder="Username" required />
+        <i class="fa-regular fa-user"></i>
+        <input type="text" id="username" placeholder="Buat Username" required autocomplete="off" />
       </div>
 
       <div class="input-group">
-        <i class="fa fa-lock"></i>
-        <input type="password" id="password" placeholder="Password (min 4 karakter)" required />
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" id="password" placeholder="Buat Password (min. 4 karakter)" required />
       </div>
 
-      <button type="submit">Daftar</button>
+      <button type="submit" id="regBtn">Daftar Sekarang</button>
     </form>
 
     <div class="footer-text">
-      Sudah punya akun? <a href="/login/">Login</a>
+      Sudah punya akun? <a href="/login/">Masuk di sini</a>
     </div>
   </div>
 
   <script>
     const form = document.getElementById("registerForm");
     const messageDiv = document.getElementById("message");
+    const btn = document.getElementById("regBtn");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -196,13 +248,18 @@
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
 
+      // Reset UI
       messageDiv.textContent = "";
-      messageDiv.style.color = "#ffb3b3";
-
+      messageDiv.style.color = "var(--error)";
+      
       if (password.length < 4) {
-        messageDiv.textContent = "Password minimal 4 karakter";
+        messageDiv.textContent = "⚠️ Password minimal 4 karakter";
         return;
       }
+
+      // Button Loading state
+      btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memproses...';
+      btn.disabled = true;
 
       try {
         const res = await fetch("/api/register", {
@@ -214,15 +271,20 @@
         const result = await res.json();
 
         if (result.success) {
-          messageDiv.style.color = "#b6ffce";
+          messageDiv.style.color = "var(--success)";
           messageDiv.innerHTML =
-            'Registrasi berhasil 🎉 <br><a href="/login/">Klik untuk login</a>';
+            'Berhasil terdaftar! 🎉 <br><a href="/login/">Klik di sini untuk Login</a>';
           form.reset();
+          btn.style.display = "none"; // Sembunyikan tombol jika sukses
         } else {
-          messageDiv.textContent = result.message || "Registrasi gagal";
+          messageDiv.textContent = result.message || "Registrasi gagal, coba username lain.";
+          btn.innerHTML = 'Daftar Sekarang';
+          btn.disabled = false;
         }
       } catch (err) {
-        messageDiv.textContent = "Server error, coba lagi";
+        messageDiv.textContent = "Koneksi server terputus.";
+        btn.innerHTML = 'Daftar Sekarang';
+        btn.disabled = false;
       }
     });
   </script>
