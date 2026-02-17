@@ -14,9 +14,9 @@ import { and, eq } from "drizzle-orm";
 const app = new Hono();
 app.use("/*", serveStatic({ root: "./public" }));
 
-// ==================
+
 // AUTH MIDDLEWARE
-// ==================
+
 const authMiddleware = async (c, next) => {
   const token = getCookie(c, "token");
 
@@ -38,9 +38,9 @@ const authMiddleware = async (c, next) => {
   }
 };
 
-// ==================
+
 // REGISTER
-// ==================
+
 app.post("/api/register", async (c) => {
   try {
     const { username, password } = await c.req.json();
@@ -66,9 +66,9 @@ app.post("/api/register", async (c) => {
   }
 });
 
-// ==================
+
 // LOGIN
-// ==================
+
 app.post("/api/login", async (c) => {
   try {
     const { username, password } = await c.req.json();
@@ -111,24 +111,24 @@ app.post("/api/login", async (c) => {
   }
 });
 
-// ==================
+
 // GET ME
-// ==================
+
 app.get("/api/me", authMiddleware, (c) => {
   return c.json({ success: true, data: c.get("user") });
 });
 
-// ==================
+
 // LOGOUT
-// ==================
+
 app.post("/api/logout", (c) => {
   setCookie(c, "token", "", { maxAge: -1 });
   return c.json({ success: true, message: "Logout berhasil" });
 });
 
-// ==================
+
 // CREATE TODO ✅ FIX
-// ==================
+
 app.post("/api/todos", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
@@ -154,9 +154,9 @@ app.post("/api/todos", authMiddleware, async (c) => {
   }
 });
 
-// ==================
+
 // GET TODO ✅ FIX
-// ==================
+
 app.get("/api/todos", authMiddleware, async (c) => {
   const user = c.get("user");
 
@@ -167,9 +167,9 @@ app.get("/api/todos", authMiddleware, async (c) => {
   return c.json({ success: true, data });
 });
 
-// ==================
+
 // UPDATE STATUS ✅ FIX
-// ==================
+
 app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
@@ -188,9 +188,9 @@ app.put("/api/todos/:id/status", authMiddleware, async (c) => {
   return c.json({ success: true, data: updated });
 });
 
-// ==================
+
 // DELETE TODO ✅ FIX
-// ==================
+
 app.delete("/api/todos/:id", authMiddleware, async (c) => {
   const user = c.get("user");
   const id = Number(c.req.param("id"));
@@ -206,9 +206,9 @@ app.delete("/api/todos/:id", authMiddleware, async (c) => {
 
   return c.json({ success: true });
 });
-// ==================
+
 // PAGE GUARD
-// ==================
+
 const requireGuest = async (c, next) => {
   const token = getCookie(c, "token");
   if (token) {
@@ -226,9 +226,9 @@ const requireAuthPage = async (c, next) => {
 };
 
 
-// ==================
+
 // HOME
-// ==================
+
 app.get("/", (c) => {
   const token = getCookie(c, "token");
   if (token) {
@@ -238,9 +238,9 @@ app.get("/", (c) => {
 });
 
 
-// ==================
+
 // SERVER
-// ==================
+
 const port = 5000;
 console.log(`🚀 Server is running on http://localhost:${port}`);
 serve({ fetch: app.fetch, port });
